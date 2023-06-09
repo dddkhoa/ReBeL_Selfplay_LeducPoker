@@ -117,5 +117,7 @@ class Game:
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-        board_s = "".join(self.env.square_content[square] for row in board for square in row)
+        board_s = "".join(
+            self.env.square_content[square] for row in board for square in row
+        )
         return board_s

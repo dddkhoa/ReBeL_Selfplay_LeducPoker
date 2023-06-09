@@ -8,6 +8,7 @@ src/gym-battleship
 *.iws
 .ipynb_checkpoints
 
+.__pycache__
 
 # Others
 *.xml

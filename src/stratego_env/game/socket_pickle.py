@@ -38,7 +38,7 @@ def get_connection(host_addr, port, retries=5):
 
 
 def pickle_recv(s):
-    full_msg = b''
+    full_msg = b""
     new_msg = True
     while True:
         msg = s.recv(16)
@@ -63,11 +63,11 @@ def pickle_recv(s):
 
 def pickle_send(s, data):
     msg = pickle.dumps(data)
-    msg = bytes(f"{len(msg):<{HEADER_SIZE}}", 'utf-8') + msg
+    msg = bytes(f"{len(msg):<{HEADER_SIZE}}", "utf-8") + msg
     s.send(msg)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import numpy as np
 
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -79,5 +79,5 @@ if __name__ == '__main__':
 
     clientsocket, address = s.accept()
 
-    pickle_send(clientsocket, {'hey': np.random.uniform(size=(10, 10, 2))})
+    pickle_send(clientsocket, {"hey": np.random.uniform(size=(10, 10, 2))})
     print(pickle_recv(sc))

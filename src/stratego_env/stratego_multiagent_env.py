@@ -1,6 +1,4 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
 import copy
 import socket
@@ -8,27 +6,38 @@ import time
 from contextlib import closing
 
 import numpy as np
-from gymnasium.spaces import Discrete, Box, Dict
+from gymnasium.spaces import Box, Dict, Discrete
 
 from stratego_env.game import socket_pickle
-from stratego_env.game.config import STANDARD_STRATEGO_CONFIG, BARRAGE_STRATEGO_CONFIG, MEDIUM_STRATEGO_CONFIG, \
-    TINY_STRATEGO_CONFIG, MICRO_STRATEGO_CONFIG, OCTA_BARRAGE_STRATEGO_CONFIG, STANDARD_STRATEGO_CONFIG2, \
-    SHORT_STANDARD_STRATEGO_CONFIG, SHORT_BARRAGE_STRATEGO_CONFIG, MEDIUM_STANDARD_STRATEGO_CONFIG, \
-    FIVES_STRATEGO_CONFIG
-from stratego_env.game.enums import ObservationModes, ObservationComponents, GameVersions
+from stratego_env.game.config import (BARRAGE_STRATEGO_CONFIG,
+                                      FIVES_STRATEGO_CONFIG,
+                                      MEDIUM_STANDARD_STRATEGO_CONFIG,
+                                      MEDIUM_STRATEGO_CONFIG,
+                                      MICRO_STRATEGO_CONFIG,
+                                      OCTA_BARRAGE_STRATEGO_CONFIG,
+                                      SHORT_BARRAGE_STRATEGO_CONFIG,
+                                      SHORT_STANDARD_STRATEGO_CONFIG,
+                                      STANDARD_STRATEGO_CONFIG,
+                                      STANDARD_STRATEGO_CONFIG2,
+                                      TINY_STRATEGO_CONFIG)
+from stratego_env.game.enums import (GameVersions, ObservationComponents,
+                                     ObservationModes)
 from stratego_env.game.stratego_procedural_env import StrategoProceduralEnv
-from stratego_env.game.stratego_procedural_impl import RecentMoves, SP, \
-    FULLY_OBSERVABLE_OBS_NUM_LAYERS, PARTIALLY_OBSERVABLE_OBS_NUM_LAYERS, \
-    FULLY_OBSERVABLE_OBS_NUM_LAYERS_EXTENDED, PARTIALLY_OBSERVABLE_OBS_NUM_LAYERS_EXTENDED, \
-    PartiallyObservableObsLayersExtendedChannels, FullyObservableObsLayersExtendedChannels, \
-    PartiallyObservableObsLayers, FullyObservableObsLayers
-from stratego_env.game.util import get_random_initial_state_fn, get_random_human_init_fn, get_random_curriculum_init_fn
+from stratego_env.game.stratego_procedural_impl import (
+    FULLY_OBSERVABLE_OBS_NUM_LAYERS, FULLY_OBSERVABLE_OBS_NUM_LAYERS_EXTENDED,
+    PARTIALLY_OBSERVABLE_OBS_NUM_LAYERS,
+    PARTIALLY_OBSERVABLE_OBS_NUM_LAYERS_EXTENDED, SP, FullyObservableObsLayers,
+    FullyObservableObsLayersExtendedChannels, PartiallyObservableObsLayers,
+    PartiallyObservableObsLayersExtendedChannels, RecentMoves)
+from stratego_env.game.util import (get_random_curriculum_init_fn,
+                                    get_random_human_init_fn,
+                                    get_random_initial_state_fn)
 
 # from ray.rllib.env.multi_agent_env import MultiAgentEnv
 # from ray.tune.registry import register_env
 
 # env rllib registered name
-SPATIAL_STRATEGO_ENV = 'SpatialStratego-v1'
+SPATIAL_STRATEGO_ENV = "SpatialStratego-v1"
 
 VERSION_CONFIGS = {
     GameVersions.SHORT_STANDARD: SHORT_STANDARD_STRATEGO_CONFIG,
@@ -41,31 +50,28 @@ VERSION_CONFIGS = {
     GameVersions.MEDIUM: MEDIUM_STRATEGO_CONFIG,
     GameVersions.TINY: TINY_STRATEGO_CONFIG,
     GameVersions.MICRO: MICRO_STRATEGO_CONFIG,
-    GameVersions.FIVES: FIVES_STRATEGO_CONFIG
+    GameVersions.FIVES: FIVES_STRATEGO_CONFIG,
 }
 
 DEFAULT_CONFIG = {
-    'version': GameVersions.STANDARD,
-    'repeat_games_from_other_side': False,  # if True, Each game will be played twice, swapping sides players start on.
+    "version": GameVersions.STANDARD,
+    "repeat_games_from_other_side": False,  # if True, Each game will be played twice, swapping sides players start on.
     # The environment retains state between resets to do this.^
-    'random_player_assignment': False,
-
-    'observation_mode': ObservationModes.BOTH_OBSERVATIONS,  # options are 'partially_observable' or 'fully_observable'
-    'observation_includes_internal_state': False,  # Tree search methods require this to be True
-
-    'vs_bot': False,
-    'bot_player_num': 1,
-    'fixed_bot_player_num': True,
-    'bot_relative_path': 'basic_python.py',
-
-    'vs_human': False,  # one of the players is a human using a web gui
-    'human_player_num': -1,  # 1 or -1
-    'human_web_gui_port': 7000,
-    'human_inits': False,
-    'penalize_ties': False,
-    'curriculum_start_states_path': None,
-    "obs_channel_mode": 'extended',  # 'original' or 'extended'
-    'same_start_pos_everytime': False,
+    "random_player_assignment": False,
+    "observation_mode": ObservationModes.BOTH_OBSERVATIONS,  # options are 'partially_observable' or 'fully_observable'
+    "observation_includes_internal_state": False,  # Tree search methods require this to be True
+    "vs_bot": False,
+    "bot_player_num": 1,
+    "fixed_bot_player_num": True,
+    "bot_relative_path": "basic_python.py",
+    "vs_human": False,  # one of the players is a human using a web gui
+    "human_player_num": -1,  # 1 or -1
+    "human_web_gui_port": 7000,
+    "human_inits": False,
+    "penalize_ties": False,
+    "curriculum_start_states_path": None,
+    "obs_channel_mode": "extended",  # 'original' or 'extended'
+    "same_start_pos_everytime": False,
 }
 
 
@@ -79,7 +85,7 @@ def with_base_config(base_config, extra_config):
 
 def find_free_port():
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('localhost', 0))
+        s.bind(("localhost", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
 
@@ -91,9 +97,13 @@ def _get_fully_observable_max_and_min_vals(piece_amounts):
     max_po_piece_val = SP.UNKNOWN.value
     min_po_piece_val = SP.NOPIECE.value
 
-    p1_obs_cap_start = FullyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
+    p1_obs_cap_start = (
+        FullyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
+    )
     p1_obs_cap_end = FullyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
-    p2_obs_cap_start = FullyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
+    p2_obs_cap_start = (
+        FullyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
+    )
     p2_obs_cap_end = FullyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
 
     # [0] owned_pieces,
@@ -106,19 +116,22 @@ def _get_fully_observable_max_and_min_vals(piece_amounts):
     # [7:19] owned_captured_pieces
     # [19:31] enemy_captured_pieces
 
-    max_vals = np.asarray([
-        max_piece_val,
-        max_piece_val,
-        2,
-        RecentMoves.JUST_CAME_FROM.value,
-        RecentMoves.JUST_CAME_FROM.value,
-        max_po_piece_val,
-        max_po_piece_val,
-        *[2 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[2 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        2,
-        2],
-        dtype=np.float32)
+    max_vals = np.asarray(
+        [
+            max_piece_val,
+            max_piece_val,
+            2,
+            RecentMoves.JUST_CAME_FROM.value,
+            RecentMoves.JUST_CAME_FROM.value,
+            max_po_piece_val,
+            max_po_piece_val,
+            *[2 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[2 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            2,
+            2,
+        ],
+        dtype=np.float32,
+    )
 
     for piece_type, piece_amount in piece_amounts.items():
         if piece_amount > 1:
@@ -126,19 +139,22 @@ def _get_fully_observable_max_and_min_vals(piece_amounts):
             for start_layer in [p1_obs_cap_start, p2_obs_cap_start]:
                 max_vals[start_layer + offset] = piece_amount
 
-    min_vals = np.asarray([
-        min_piece_val,
-        min_piece_val,
-        0,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        min_po_piece_val,
-        min_po_piece_val,
-        *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        0,
-        0],
-        dtype=np.float32)
+    min_vals = np.asarray(
+        [
+            min_piece_val,
+            min_piece_val,
+            0,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            min_po_piece_val,
+            min_po_piece_val,
+            *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            0,
+            0,
+        ],
+        dtype=np.float32,
+    )
 
     return max_vals, min_vals
 
@@ -150,10 +166,18 @@ def _get_partially_observable_max_and_min_vals(piece_amounts):
     max_po_piece_val = SP.UNKNOWN.value
     min_po_piece_val = SP.NOPIECE.value
 
-    p1_obs_cap_start = PartiallyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
-    p1_obs_cap_end = PartiallyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
-    p2_obs_cap_start = PartiallyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
-    p2_obs_cap_end = PartiallyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
+    p1_obs_cap_start = (
+        PartiallyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
+    )
+    p1_obs_cap_end = (
+        PartiallyObservableObsLayers.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
+    )
+    p2_obs_cap_start = (
+        PartiallyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
+    )
+    p2_obs_cap_end = (
+        PartiallyObservableObsLayers.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
+    )
 
     # [0] owned_pieces,
     # [1] owned_po_pieces,
@@ -164,18 +188,21 @@ def _get_partially_observable_max_and_min_vals(piece_amounts):
     # [6:18] owned_captured_pieces
     # [18:30] enemy_captured_pieces
 
-    max_vals = np.asarray([
-        max_piece_val,
-        max_po_piece_val,
-        max_po_piece_val,
-        2,
-        RecentMoves.JUST_CAME_FROM.value,
-        RecentMoves.JUST_CAME_FROM.value,
-        *[2 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[2 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        2,
-        2],
-        dtype=np.float32)
+    max_vals = np.asarray(
+        [
+            max_piece_val,
+            max_po_piece_val,
+            max_po_piece_val,
+            2,
+            RecentMoves.JUST_CAME_FROM.value,
+            RecentMoves.JUST_CAME_FROM.value,
+            *[2 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[2 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            2,
+            2,
+        ],
+        dtype=np.float32,
+    )
 
     for piece_type, piece_amount in piece_amounts.items():
         if piece_amount > 1:
@@ -183,18 +210,21 @@ def _get_partially_observable_max_and_min_vals(piece_amounts):
             for start_layer in [p1_obs_cap_start, p2_obs_cap_start]:
                 max_vals[start_layer + offset] = piece_amount
 
-    min_vals = np.asarray([
-        min_piece_val,
-        min_po_piece_val,
-        min_po_piece_val,
-        0,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        0,
-        0],
-        dtype=np.float32)
+    min_vals = np.asarray(
+        [
+            min_piece_val,
+            min_po_piece_val,
+            min_po_piece_val,
+            0,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            0,
+            0,
+        ],
+        dtype=np.float32,
+    )
 
     return max_vals, min_vals
 
@@ -206,34 +236,61 @@ def _get_fully_observable_max_and_min_vals_extended_channels(piece_amounts):
     max_po_piece_val = SP.UNKNOWN.value
     min_po_piece_val = SP.NOPIECE.value
 
-    p1_pcs_start = FullyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_START.value
-    p1_pcs_end = FullyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_END.value
-    p2_pcs_start = FullyObservableObsLayersExtendedChannels.PLAYER_2_PIECES_RANGE_START.value
-    p2_pcs_end = FullyObservableObsLayersExtendedChannels.PLAYER_2_PIECES_RANGE_END.value
+    p1_pcs_start = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_START.value
+    )
+    p1_pcs_end = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_END.value
+    )
+    p2_pcs_start = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_2_PIECES_RANGE_START.value
+    )
+    p2_pcs_end = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_2_PIECES_RANGE_END.value
+    )
 
-    p1_po_pcs_start = FullyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_START.value
-    p1_po_pcs_end = FullyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_END.value
-    p2_po_pcs_start = FullyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_START.value
-    p2_po_pcs_end = FullyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_END.value
+    p1_po_pcs_start = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_START.value
+    )
+    p1_po_pcs_end = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_END.value
+    )
+    p2_po_pcs_start = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_START.value
+    )
+    p2_po_pcs_end = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_END.value
+    )
 
-    p1_obs_cap_start = FullyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
-    p1_obs_cap_end = FullyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
-    p2_obs_cap_start = FullyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
-    p2_obs_cap_end = FullyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
+    p1_obs_cap_start = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
+    )
+    p1_obs_cap_end = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
+    )
+    p2_obs_cap_start = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
+    )
+    p2_obs_cap_end = (
+        FullyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
+    )
 
-    max_vals = np.asarray([
-        *[1 for _ in range(p1_pcs_start, p1_pcs_end)],
-        *[1 for _ in range(p2_pcs_start, p2_pcs_end)],
-        *[1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
-        *[1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
-        1,
-        RecentMoves.JUST_CAME_FROM.value,
-        RecentMoves.JUST_CAME_FROM.value,
-        *[8 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[8 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        1,
-        1],
-        dtype=np.float32)
+    max_vals = np.asarray(
+        [
+            *[1 for _ in range(p1_pcs_start, p1_pcs_end)],
+            *[1 for _ in range(p2_pcs_start, p2_pcs_end)],
+            *[1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
+            *[1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
+            1,
+            RecentMoves.JUST_CAME_FROM.value,
+            RecentMoves.JUST_CAME_FROM.value,
+            *[8 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[8 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            1,
+            1,
+        ],
+        dtype=np.float32,
+    )
 
     for piece_type, piece_amount in piece_amounts.items():
         if piece_amount > 1:
@@ -241,19 +298,22 @@ def _get_fully_observable_max_and_min_vals_extended_channels(piece_amounts):
             for start_layer in [p1_obs_cap_start, p2_obs_cap_start]:
                 max_vals[start_layer + offset] = piece_amount
 
-    min_vals = np.asarray([
-        *[-1 for _ in range(p1_pcs_start, p1_pcs_end)],
-        *[-1 for _ in range(p2_pcs_start, p2_pcs_end)],
-        *[-1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
-        *[-1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
-        -1,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        -1,
-        -1],
-        dtype=np.float32)
+    min_vals = np.asarray(
+        [
+            *[-1 for _ in range(p1_pcs_start, p1_pcs_end)],
+            *[-1 for _ in range(p2_pcs_start, p2_pcs_end)],
+            *[-1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
+            *[-1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
+            -1,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            -1,
+            -1,
+        ],
+        dtype=np.float32,
+    )
 
     return max_vals, min_vals
 
@@ -265,31 +325,54 @@ def _get_partially_observable_max_and_min_vals_extended_channels(piece_amounts):
     max_po_piece_val = SP.UNKNOWN.value
     min_po_piece_val = SP.NOPIECE.value
 
-    p1_pcs_start = PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_START.value
-    p1_pcs_end = PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_END.value
+    p1_pcs_start = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_START.value
+    )
+    p1_pcs_end = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PIECES_RANGE_END.value
+    )
 
-    p1_po_pcs_start = PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_START.value
-    p1_po_pcs_end = PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_END.value
-    p2_po_pcs_start = PartiallyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_START.value
-    p2_po_pcs_end = PartiallyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_END.value
+    p1_po_pcs_start = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_START.value
+    )
+    p1_po_pcs_end = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_1_PO_PIECES_RANGE_END.value
+    )
+    p2_po_pcs_start = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_START.value
+    )
+    p2_po_pcs_end = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_2_PO_PIECES_RANGE_END.value
+    )
 
-    p1_obs_cap_start = PartiallyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
-    p1_obs_cap_end = PartiallyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
-    p2_obs_cap_start = PartiallyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
-    p2_obs_cap_end = PartiallyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
+    p1_obs_cap_start = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_START.value
+    )
+    p1_obs_cap_end = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_1_CAPTURED_PIECE_RANGE_END.value
+    )
+    p2_obs_cap_start = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_START.value
+    )
+    p2_obs_cap_end = (
+        PartiallyObservableObsLayersExtendedChannels.PLAYER_2_CAPTURED_PIECE_RANGE_END.value
+    )
 
-    max_vals = np.asarray([
-        *[1 for _ in range(p1_pcs_start, p1_pcs_end)],
-        *[1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
-        *[1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
-        1,
-        RecentMoves.JUST_CAME_FROM.value,
-        RecentMoves.JUST_CAME_FROM.value,
-        *[8 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[8 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        1,
-        1],
-        dtype=np.float32)
+    max_vals = np.asarray(
+        [
+            *[1 for _ in range(p1_pcs_start, p1_pcs_end)],
+            *[1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
+            *[1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
+            1,
+            RecentMoves.JUST_CAME_FROM.value,
+            RecentMoves.JUST_CAME_FROM.value,
+            *[8 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[8 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            1,
+            1,
+        ],
+        dtype=np.float32,
+    )
 
     for piece_type, piece_amount in piece_amounts.items():
         if piece_amount > 1:
@@ -297,63 +380,75 @@ def _get_partially_observable_max_and_min_vals_extended_channels(piece_amounts):
             for start_layer in [p1_obs_cap_start, p2_obs_cap_start]:
                 max_vals[start_layer + offset] = piece_amount
 
-    min_vals = np.asarray([
-        *[-1 for _ in range(p1_pcs_start, p1_pcs_end)],
-        *[-1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
-        *[-1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
-        -1,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
-        *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
-        *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
-        -1,
-        -1],
-        dtype=np.float32)
+    min_vals = np.asarray(
+        [
+            *[-1 for _ in range(p1_pcs_start, p1_pcs_end)],
+            *[-1 for _ in range(p1_po_pcs_start, p1_po_pcs_end)],
+            *[-1 for _ in range(p2_po_pcs_start, p2_po_pcs_end)],
+            -1,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            RecentMoves.JUST_ARRIVED_AND_CANT_DOUBLE_BACK.value,
+            *[0 for _ in range(p1_obs_cap_start, p1_obs_cap_end)],
+            *[0 for _ in range(p2_obs_cap_start, p2_obs_cap_end)],
+            -1,
+            -1,
+        ],
+        dtype=np.float32,
+    )
 
     return max_vals, min_vals
 
 
 class StrategoMultiAgentEnv:
-
     def __init__(self, env_config=None):
-
-        env_config = with_base_config(base_config=DEFAULT_CONFIG, extra_config=env_config if env_config else {})
+        env_config = with_base_config(
+            base_config=DEFAULT_CONFIG, extra_config=env_config if env_config else {}
+        )
 
         # combine env_config with the config for the specific stratego_env version selected
-        env_config = with_base_config(base_config=VERSION_CONFIGS[env_config['version']], extra_config=env_config)
+        env_config = with_base_config(
+            base_config=VERSION_CONFIGS[env_config["version"]], extra_config=env_config
+        )
 
-        rows = env_config['rows']
-        columns = env_config['columns']
-        piece_amounts = env_config['piece_amounts']
+        rows = env_config["rows"]
+        columns = env_config["columns"]
+        piece_amounts = env_config["piece_amounts"]
 
-        self.base_env: StrategoProceduralEnv = StrategoProceduralEnv(rows=rows, columns=columns)
-        self.penalize_ties = env_config['penalize_ties']
-        self.random_player_assignment = env_config['random_player_assignment']
-        assert not (env_config['human_inits'] and env_config['curriculum_start_states_path'])
+        self.base_env: StrategoProceduralEnv = StrategoProceduralEnv(
+            rows=rows, columns=columns
+        )
+        self.penalize_ties = env_config["penalize_ties"]
+        self.random_player_assignment = env_config["random_player_assignment"]
+        assert not (
+            env_config["human_inits"] and env_config["curriculum_start_states_path"]
+        )
         self.use_curriculum_inits = False
 
-        if env_config['human_inits']:
+        if env_config["human_inits"]:
+            self.random_initial_state_fn = get_random_human_init_fn(
+                game_version=env_config["version"],
+                game_version_config=env_config,
+                procedural_env=self.base_env,
+            )
 
-            self.random_initial_state_fn = get_random_human_init_fn(game_version=env_config['version'],
-                                                                    game_version_config=env_config,
-                                                                    procedural_env=self.base_env)
-
-        elif env_config['curriculum_start_states_path']:
+        elif env_config["curriculum_start_states_path"]:
             self.use_curriculum_inits = True
             self.random_player_assignment = True
             self.random_initial_state_fn = get_random_curriculum_init_fn(
-                inits_path=env_config['curriculum_start_states_path'],
-                max_turns=VERSION_CONFIGS[env_config['version']]['max_turns'])
+                inits_path=env_config["curriculum_start_states_path"],
+                max_turns=VERSION_CONFIGS[env_config["version"]]["max_turns"],
+            )
         else:
-            self.random_initial_state_fn = get_random_initial_state_fn(base_env=self.base_env,
-                                                                       game_version_config=VERSION_CONFIGS[
-                                                                           env_config['version']])
+            self.random_initial_state_fn = get_random_initial_state_fn(
+                base_env=self.base_env,
+                game_version_config=VERSION_CONFIGS[env_config["version"]],
+            )
 
-        if env_config['same_start_pos_everytime']:
+        if env_config["same_start_pos_everytime"]:
             fixed_initial_state = self.random_initial_state_fn()
             self.random_initial_state_fn = lambda: fixed_initial_state
 
-        self.repeat_games_from_other_side = env_config['repeat_games_from_other_side']
+        self.repeat_games_from_other_side = env_config["repeat_games_from_other_side"]
 
         assert not (self.random_player_assignment and self.repeat_games_from_other_side)
 
@@ -361,55 +456,90 @@ class StrategoMultiAgentEnv:
         self.last_initial_state = None
         self.action_space = Discrete(np.prod(self.base_env.spatial_action_size))
 
-        self.observation_mode = env_config['observation_mode']
+        self.observation_mode = env_config["observation_mode"]
 
-        self.observation_includes_internal_state = env_config['observation_includes_internal_state']
+        self.observation_includes_internal_state = env_config[
+            "observation_includes_internal_state"
+        ]
 
-        self._extended_channels = env_config['obs_channel_mode'] == 'extended'
+        self._extended_channels = env_config["obs_channel_mode"] == "extended"
 
         if not self._extended_channels:
-            self._p_obs_highs, self._p_obs_lows = _get_partially_observable_max_and_min_vals(
-                piece_amounts=piece_amounts)
+            (
+                self._p_obs_highs,
+                self._p_obs_lows,
+            ) = _get_partially_observable_max_and_min_vals(piece_amounts=piece_amounts)
             self._p_obs_num_layers = PARTIALLY_OBSERVABLE_OBS_NUM_LAYERS
-            self._f_obs_highs, self._f_obs_lows = _get_fully_observable_max_and_min_vals(piece_amounts=piece_amounts)
+            (
+                self._f_obs_highs,
+                self._f_obs_lows,
+            ) = _get_fully_observable_max_and_min_vals(piece_amounts=piece_amounts)
             self._f_obs_num_layers = FULLY_OBSERVABLE_OBS_NUM_LAYERS
         else:
-            self._p_obs_highs, self._p_obs_lows = _get_partially_observable_max_and_min_vals_extended_channels(
-                piece_amounts=piece_amounts)
+            (
+                self._p_obs_highs,
+                self._p_obs_lows,
+            ) = _get_partially_observable_max_and_min_vals_extended_channels(
+                piece_amounts=piece_amounts
+            )
             self._p_obs_num_layers = PARTIALLY_OBSERVABLE_OBS_NUM_LAYERS_EXTENDED
-            self._f_obs_highs, self._f_obs_lows = _get_fully_observable_max_and_min_vals_extended_channels(
-                piece_amounts=piece_amounts)
+            (
+                self._f_obs_highs,
+                self._f_obs_lows,
+            ) = _get_fully_observable_max_and_min_vals_extended_channels(
+                piece_amounts=piece_amounts
+            )
             self._f_obs_num_layers = FULLY_OBSERVABLE_OBS_NUM_LAYERS_EXTENDED
 
-        assert self.observation_mode in [ObservationModes.PARTIALLY_OBSERVABLE, ObservationModes.FULLY_OBSERVABLE,
-                                         ObservationModes.BOTH_OBSERVATIONS]
+        assert self.observation_mode in [
+            ObservationModes.PARTIALLY_OBSERVABLE,
+            ObservationModes.FULLY_OBSERVABLE,
+            ObservationModes.BOTH_OBSERVATIONS,
+        ]
 
         # Used to normalize observations from self.base_env to [-1, 1]
-        self._p_obs_ranges = np.reshape((self._p_obs_highs - self._p_obs_lows) / np.float32(2.0),
-                                        newshape=(1, 1, self._p_obs_num_layers))
-        self._p_obs_mids = np.reshape((self._p_obs_highs + self._p_obs_lows) / np.float32(2.0),
-                                      newshape=(1, 1, self._p_obs_num_layers))
+        self._p_obs_ranges = np.reshape(
+            (self._p_obs_highs - self._p_obs_lows) / np.float32(2.0),
+            newshape=(1, 1, self._p_obs_num_layers),
+        )
+        self._p_obs_mids = np.reshape(
+            (self._p_obs_highs + self._p_obs_lows) / np.float32(2.0),
+            newshape=(1, 1, self._p_obs_num_layers),
+        )
 
-        self._f_obs_ranges = np.reshape((self._f_obs_highs - self._f_obs_lows) / np.float32(2.0),
-                                        newshape=(1, 1, self._f_obs_num_layers))
-        self._f_obs_mids = np.reshape((self._f_obs_highs + self._f_obs_lows) / np.float32(2.0),
-                                      newshape=(1, 1, self._f_obs_num_layers))
+        self._f_obs_ranges = np.reshape(
+            (self._f_obs_highs - self._f_obs_lows) / np.float32(2.0),
+            newshape=(1, 1, self._f_obs_num_layers),
+        )
+        self._f_obs_mids = np.reshape(
+            (self._f_obs_highs + self._f_obs_lows) / np.float32(2.0),
+            newshape=(1, 1, self._f_obs_num_layers),
+        )
 
         self.observation_space = {
             ObservationComponents.VALID_ACTIONS_MASK.value: Box(
                 low=np.float32(0),
                 high=np.float32(1),
                 shape=self.base_env.spatial_action_size,
-            )}
+            )
+        }
 
-        if self.observation_mode == ObservationModes.PARTIALLY_OBSERVABLE or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS:
-            self.observation_space[ObservationComponents.PARTIAL_OBSERVATION.value] = Box(
+        if (
+            self.observation_mode == ObservationModes.PARTIALLY_OBSERVABLE
+            or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS
+        ):
+            self.observation_space[
+                ObservationComponents.PARTIAL_OBSERVATION.value
+            ] = Box(
                 low=np.float32(-1.0),
                 high=np.float32(1.0),
                 shape=(rows, columns, self._p_obs_num_layers),
             )
 
-        if self.observation_mode == ObservationModes.FULLY_OBSERVABLE or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS:
+        if (
+            self.observation_mode == ObservationModes.FULLY_OBSERVABLE
+            or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS
+        ):
             self.observation_space[ObservationComponents.FULL_OBSERVATION.value] = Box(
                 low=np.float32(-1.0),
                 high=np.float32(1.0),
@@ -426,85 +556,104 @@ class StrategoMultiAgentEnv:
 
         self.observation_space = Dict(self.observation_space)
 
-        self.vs_human = env_config['vs_human']
-        self.human_web_gui_port = env_config['human_web_gui_port']
-        self.human_player_num = env_config['human_player_num']
+        self.vs_human = env_config["vs_human"]
+        self.human_web_gui_port = env_config["human_web_gui_port"]
+        self.human_player_num = env_config["human_player_num"]
         if self.vs_human:
-            from stratego_env.game.stratego_human_server import StrategoHumanGUIServer
-            self.gui_server = StrategoHumanGUIServer(base_env=self.base_env, port=self.human_web_gui_port)
+            from stratego_env.game.stratego_human_server import \
+                StrategoHumanGUIServer
 
-        self.vs_bot = env_config['vs_bot']
-        self.bot_player_num = env_config['bot_player_num']
-        self.fixed_bot_player_num = env_config['fixed_bot_player_num']
+            self.gui_server = StrategoHumanGUIServer(
+                base_env=self.base_env, port=self.human_web_gui_port
+            )
+
+        self.vs_bot = env_config["vs_bot"]
+        self.bot_player_num = env_config["bot_player_num"]
+        self.fixed_bot_player_num = env_config["fixed_bot_player_num"]
         assert not (self.random_player_assignment and (self.vs_bot or self.vs_human))
 
-        self.bot_relative_path = env_config['bot_relative_path']
+        self.bot_relative_path = env_config["bot_relative_path"]
         if self.vs_bot:
             self.bot_controller_socket = None
         if self.vs_bot and self.vs_human:
             assert self.human_player_num != self.bot_player_num
 
     def _get_current_obs(self, player=None):
-
         if player is None:
             player = self.player
 
-        player_perspective_state = self.base_env.get_state_from_player_perspective(self.state, player)
+        player_perspective_state = self.base_env.get_state_from_player_perspective(
+            self.state, player
+        )
 
-        valid_actions_mask = self.base_env.get_valid_moves_as_spatial_mask(state=player_perspective_state, player=1)
+        valid_actions_mask = self.base_env.get_valid_moves_as_spatial_mask(
+            state=player_perspective_state, player=1
+        )
 
-        return_dict = {ObservationComponents.VALID_ACTIONS_MASK.value: valid_actions_mask}
+        return_dict = {
+            ObservationComponents.VALID_ACTIONS_MASK.value: valid_actions_mask
+        }
 
-        if self.observation_mode == ObservationModes.PARTIALLY_OBSERVABLE or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS:
-
+        if (
+            self.observation_mode == ObservationModes.PARTIALLY_OBSERVABLE
+            or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS
+        ):
             if self._extended_channels:
                 p_obs = self.base_env.get_partially_observable_observation_extended_channels(
-                    state=player_perspective_state,
-                    player=1)
+                    state=player_perspective_state, player=1
+                )
             else:
                 p_obs = self.base_env.get_partially_observable_observation(
-                    state=player_perspective_state,
-                    player=1)
+                    state=player_perspective_state, player=1
+                )
 
             # normalize observation to be in the range [-1, 1]
             # each obs layer is normalized by different values
             p_obs = self.normalize_p_observation(p_obs)
             if np.isnan(p_obs).any():
-                assert False, "There's been a mistake. An observation was generated with a NAN value."
+                assert (
+                    False
+                ), "There's been a mistake. An observation was generated with a NAN value."
 
             return_dict[ObservationComponents.PARTIAL_OBSERVATION.value] = p_obs
 
-        if self.observation_mode == ObservationModes.FULLY_OBSERVABLE or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS:
-
+        if (
+            self.observation_mode == ObservationModes.FULLY_OBSERVABLE
+            or self.observation_mode == ObservationModes.BOTH_OBSERVATIONS
+        ):
             if self._extended_channels:
-                f_obs = self.base_env.get_fully_observable_observation_extended_channels(
-                    state=player_perspective_state,
-                    player=1)
+                f_obs = (
+                    self.base_env.get_fully_observable_observation_extended_channels(
+                        state=player_perspective_state, player=1
+                    )
+                )
             else:
                 f_obs = self.base_env.get_fully_observable_observation(
-                    state=player_perspective_state,
-                    player=1)
+                    state=player_perspective_state, player=1
+                )
 
             f_obs = self.normalize_f_observation(f_obs)
             if np.isnan(f_obs).any():
-                assert False, "There's been a mistake. An observation was generated with a NAN value."
+                assert (
+                    False
+                ), "There's been a mistake. An observation was generated with a NAN value."
 
             return_dict[ObservationComponents.FULL_OBSERVATION.value] = f_obs
 
         if self.observation_includes_internal_state:
-            return_dict[ObservationComponents.INTERNAL_STATE.value] = player_perspective_state
+            return_dict[
+                ObservationComponents.INTERNAL_STATE.value
+            ] = player_perspective_state
 
         return return_dict
 
     def normalize_f_observation(self, f_obs):
-
         return (f_obs - self._f_obs_mids) / self._f_obs_ranges
 
     def denormalize_f_observation(self, f_obs: np.ndarray):
         return (f_obs * self._f_obs_ranges) + self._f_obs_mids
 
     def normalize_p_observation(self, p_obs):
-
         return (p_obs - self._p_obs_mids) / self._p_obs_ranges
 
     def denormalize_p_observation(self, p_obs: np.ndarray):
@@ -523,17 +672,25 @@ class StrategoMultiAgentEnv:
             self.player = np.random.choice([-1, 1])
 
             # player 1 gets the advantage of the curriculum start
-            self.player_map = lambda p: likely_winner if p == 1 else (-likely_winner if p == -1 else p)
-            self.reverse_player_map = lambda p: 1 if p == likely_winner else (-1 if p == -likely_winner else p)
+            self.player_map = (
+                lambda p: likely_winner
+                if p == 1
+                else (-likely_winner if p == -1 else p)
+            )
+            self.reverse_player_map = (
+                lambda p: 1
+                if p == likely_winner
+                else (-1 if p == -likely_winner else p)
+            )
 
         else:
             if self.repeat_games_from_other_side and self.episodes_completed % 2 == 1:
                 assert not self.vs_bot and not self.random_player_assignment
-                initial_state = self.base_env.get_state_from_player_perspective(state=self.last_initial_state,
-                                                                                player=-1)
+                initial_state = self.base_env.get_state_from_player_perspective(
+                    state=self.last_initial_state, player=-1
+                )
                 self.player = -1
             else:
-
                 if self.random_player_assignment:
                     if np.random.random() < 0.5:
                         self.player_map = lambda p: p
@@ -554,7 +711,9 @@ class StrategoMultiAgentEnv:
 
         if first_player_override is not None:
             if not (first_player_override == 1 or first_player_override == -1):
-                raise ValueError("first_player_override must either be 1 or -1 if it is not set to None.")
+                raise ValueError(
+                    "first_player_override must either be 1 or -1 if it is not set to None."
+                )
             self.player = first_player_override
 
         self.episodes_completed += 1
@@ -585,20 +744,36 @@ class StrategoMultiAgentEnv:
                 while True:
                     tries -= 1
                     try:
-                        launcher_socket = socket_pickle.get_connection("localhost", 9934, retries=100)
+                        launcher_socket = socket_pickle.get_connection(
+                            "localhost", 9934, retries=100
+                        )
                         time.sleep(0.0001)
-                        socket_pickle.pickle_send(launcher_socket, data=(
-                            "new_game", (initial_state, bot_player_num, bot_relative_path, bot_com_port)))
+                        socket_pickle.pickle_send(
+                            launcher_socket,
+                            data=(
+                                "new_game",
+                                (
+                                    initial_state,
+                                    bot_player_num,
+                                    bot_relative_path,
+                                    bot_com_port,
+                                ),
+                            ),
+                        )
                         break
                     except ConnectionResetError:
                         if tries <= 0:
-                            raise ConnectionResetError("Connection kept getting reset with bot launcher")
+                            raise ConnectionResetError(
+                                "Connection kept getting reset with bot launcher"
+                            )
 
                 # print("waiting for bot to connect back")
                 try:
                     bot_controller_socket, bot_controller_address = s.accept()
                 except socket.timeout as e:
-                    raise TimeoutError('It took too long for a launched bot to connect to us.')
+                    raise TimeoutError(
+                        "It took too long for a launched bot to connect to us."
+                    )
                 # print("bot connected back")
 
                 # print("\nbot controller socket connected")
@@ -611,8 +786,10 @@ class StrategoMultiAgentEnv:
             while True:
                 tries -= 1
                 try:
-                    self.launcher_socket, self.bot_controller_socket = get_bot_connection(self.bot_player_num,
-                                                                                          self.bot_relative_path)
+                    (
+                        self.launcher_socket,
+                        self.bot_controller_socket,
+                    ) = get_bot_connection(self.bot_player_num, self.bot_relative_path)
                     break
                 except TimeoutError:
                     if tries <= 0:
@@ -621,33 +798,54 @@ class StrategoMultiAgentEnv:
         obs = {self.player: self._get_current_obs()}
 
         while (self.vs_human and self.player == self.human_player_num) or (
-                self.vs_bot and self.player == self.bot_player_num):
+            self.vs_bot and self.player == self.bot_player_num
+        ):
             dones = None
             if self.vs_human and self.player == self.human_player_num:
-                action_positions = self.gui_server.get_action_by_position(state=self.state, player=self.player)
-                action = self.base_env.get_action_1d_index_from_positions(*action_positions)
-                obs, _, dones, _ = self.step(action_dict={self.human_player_num: action}, check_for_bot_move=False,
-                                             is_spatial_index=False)
+                action_positions = self.gui_server.get_action_by_position(
+                    state=self.state, player=self.player
+                )
+                action = self.base_env.get_action_1d_index_from_positions(
+                    *action_positions
+                )
+                obs, _, dones, _ = self.step(
+                    action_dict={self.human_player_num: action},
+                    check_for_bot_move=False,
+                    is_spatial_index=False,
+                )
 
                 if self.vs_bot:
                     # print("sending human move to bot...")
-                    action_positions_to_bot = self.base_env.get_action_positions_from_player_perspective(
-                        self.human_player_num,
-                        *action_positions)
-                    socket_pickle.pickle_send(self.bot_controller_socket, data=("new_move", action_positions_to_bot))
+                    action_positions_to_bot = (
+                        self.base_env.get_action_positions_from_player_perspective(
+                            self.human_player_num, *action_positions
+                        )
+                    )
+                    socket_pickle.pickle_send(
+                        self.bot_controller_socket,
+                        data=("new_move", action_positions_to_bot),
+                    )
 
             if self.vs_bot and self.player == self.bot_player_num:
                 # print(f"waiting for bot move: line 441")
                 cmd, bot_move = socket_pickle.pickle_recv(self.bot_controller_socket)
-                assert cmd == 'bot made move'
+                assert cmd == "bot made move"
                 # print(f"Reset(): Got bot move: {bot_move} line 441")
-                bot_move = self.base_env.get_action_positions_from_player_perspective(self.bot_player_num, *bot_move)
-                assert self.base_env.is_move_valid_by_position(self.state, self.player, *bot_move,
-                                                               allow_piece_oscillation=True), f"bot move is {bot_move}"
-                bot_move_action_index = self.base_env.get_action_1d_index_from_positions(*bot_move)
-                obs, _, dones, _ = self.step(action_dict={self.bot_player_num: bot_move_action_index},
-                                             check_for_human_move=False, is_spatial_index=False,
-                                             allow_piece_oscillation=True)
+                bot_move = self.base_env.get_action_positions_from_player_perspective(
+                    self.bot_player_num, *bot_move
+                )
+                assert self.base_env.is_move_valid_by_position(
+                    self.state, self.player, *bot_move, allow_piece_oscillation=True
+                ), f"bot move is {bot_move}"
+                bot_move_action_index = (
+                    self.base_env.get_action_1d_index_from_positions(*bot_move)
+                )
+                obs, _, dones, _ = self.step(
+                    action_dict={self.bot_player_num: bot_move_action_index},
+                    check_for_human_move=False,
+                    is_spatial_index=False,
+                    allow_piece_oscillation=True,
+                )
             if dones is not None and dones["__all__"]:
                 assert False, "Game finished on its own"
 
@@ -656,8 +854,14 @@ class StrategoMultiAgentEnv:
 
         return obs
 
-    def step(self, action_dict, check_for_human_move=True, check_for_bot_move=True, allow_piece_oscillation=False,
-             is_spatial_index=True):
+    def step(
+        self,
+        action_dict,
+        check_for_human_move=True,
+        check_for_bot_move=True,
+        allow_piece_oscillation=False,
+        is_spatial_index=True,
+    ):
         """Returns observations from ready agents.
         The returns are dicts mapping from agent_id strings to values. The
         number of agents in the env can vary over time.
@@ -672,7 +876,9 @@ class StrategoMultiAgentEnv:
         """
 
         if self.random_player_assignment:
-            action_dict = {self.reverse_player_map(k): v for k, v in action_dict.items()}
+            action_dict = {
+                self.reverse_player_map(k): v for k, v in action_dict.items()
+            }
 
         # action should only be for current player
         assert self.player in action_dict
@@ -686,10 +892,16 @@ class StrategoMultiAgentEnv:
             action = self.base_env.get_action_1d_index_from_spatial_index(action)
         #############
 
-        action = self.base_env.get_action_1d_index_from_player_perspective(action_index=action, player=self.player)
+        action = self.base_env.get_action_1d_index_from_player_perspective(
+            action_index=action, player=self.player
+        )
 
-        self.state, self.player = self.base_env.get_next_state(self.state, self.player, action,
-                                                               allow_piece_oscillation=allow_piece_oscillation)
+        self.state, self.player = self.base_env.get_next_state(
+            self.state,
+            self.player,
+            action,
+            allow_piece_oscillation=allow_piece_oscillation,
+        )
 
         # if self.vs_bot:
         #     debug_action_pos = self.base_env.get_action_positions_from_1d_index(action)
@@ -699,49 +911,72 @@ class StrategoMultiAgentEnv:
         reward = self.base_env.get_game_ended(self.state, self.player)
 
         if reward == 0:
+            if (
+                self.vs_human
+                and check_for_human_move
+                and self.player == self.human_player_num
+            ):
+                action_positions = self.gui_server.get_action_by_position(
+                    state=self.state, player=self.player
+                )
+                action = self.base_env.get_action_1d_index_from_positions(
+                    *action_positions
+                )
+                return self.step(
+                    action_dict={self.human_player_num: action}, is_spatial_index=False
+                )
 
-            if self.vs_human and check_for_human_move and self.player == self.human_player_num:
-                action_positions = self.gui_server.get_action_by_position(state=self.state, player=self.player)
-                action = self.base_env.get_action_1d_index_from_positions(*action_positions)
-                return self.step(action_dict={self.human_player_num: action}, is_spatial_index=False)
-
-            if self.vs_bot and check_for_bot_move and self.player == self.bot_player_num:
-                action_positions_to_bot = self.base_env.get_action_positions_from_1d_index(action_index=action)
-                socket_pickle.pickle_send(self.bot_controller_socket, data=("new_move", action_positions_to_bot))
+            if (
+                self.vs_bot
+                and check_for_bot_move
+                and self.player == self.bot_player_num
+            ):
+                action_positions_to_bot = (
+                    self.base_env.get_action_positions_from_1d_index(
+                        action_index=action
+                    )
+                )
+                socket_pickle.pickle_send(
+                    self.bot_controller_socket,
+                    data=("new_move", action_positions_to_bot),
+                )
 
                 try:
                     # print("waiting for bot move line 518")
-                    cmd, bot_move = socket_pickle.pickle_recv(self.bot_controller_socket)
+                    cmd, bot_move = socket_pickle.pickle_recv(
+                        self.bot_controller_socket
+                    )
                     # print("got bot move line 519")
                 except ValueError:
                     # assumes the bot won
                     dones = {1: True, -1: True, "__all__": True}
-                    obs = {1: self._get_current_obs(player=1), -1: self._get_current_obs(player=-1)}
+                    obs = {
+                        1: self._get_current_obs(player=1),
+                        -1: self._get_current_obs(player=-1),
+                    }
 
                     infos = {1: {}, -1: {}}
 
-                    infos[1]['game_result_was_invalid'] = False
-                    infos[-1]['game_result_was_invalid'] = False
+                    infos[1]["game_result_was_invalid"] = False
+                    infos[-1]["game_result_was_invalid"] = False
 
                     player_1_reward = 1 if self.bot_player_num == 1 else -1
                     player_2_reward = 1 if self.bot_player_num == -1 else -1
 
                     if player_1_reward == 1:
-                        infos[1]['game_result'] = 'won'
-                        infos[-1]['game_result'] = 'lost'
+                        infos[1]["game_result"] = "won"
+                        infos[-1]["game_result"] = "lost"
                     elif player_1_reward == -1:
-                        infos[1]['game_result'] = 'lost'
-                        infos[-1]['game_result'] = 'won'
+                        infos[1]["game_result"] = "lost"
+                        infos[-1]["game_result"] = "won"
                     else:
-                        infos[1]['game_result'] = 'tied'
-                        infos[-1]['game_result'] = 'tied'
+                        infos[1]["game_result"] = "tied"
+                        infos[-1]["game_result"] = "tied"
 
-                    rewards = {1: player_1_reward,
-                               -1: player_2_reward}
+                    rewards = {1: player_1_reward, -1: player_2_reward}
 
-                    if self.penalize_ties and infos[1]['game_result'] == 'tied':
-                        rewards = {1: -0.5,
-                                   -1: -0.5}
+                    if self.penalize_ties and infos[1]["game_result"] == "tied":
+                        rewards = {1: -0.5, -1: -0.5}
 
                     del obs[self.bot_player_num]
                     del rewards[self.bot_player_num]
@@ -752,14 +987,22 @@ class StrategoMultiAgentEnv:
 
                     #####################################################
 
-                assert cmd == 'bot made move'
+                assert cmd == "bot made move"
                 # print(f"Step(): Got bot move: {bot_move}")
-                assert self.base_env.is_move_valid_by_position(self.state, self.player, *bot_move,
-                                                               allow_piece_oscillation=True)
-                bot_move = self.base_env.get_action_positions_from_player_perspective(self.bot_player_num, *bot_move)
-                bot_move_action_index = self.base_env.get_action_1d_index_from_positions(*bot_move)
-                return self.step(action_dict={self.bot_player_num: bot_move_action_index}, allow_piece_oscillation=True,
-                                 is_spatial_index=False)
+                assert self.base_env.is_move_valid_by_position(
+                    self.state, self.player, *bot_move, allow_piece_oscillation=True
+                )
+                bot_move = self.base_env.get_action_positions_from_player_perspective(
+                    self.bot_player_num, *bot_move
+                )
+                bot_move_action_index = (
+                    self.base_env.get_action_1d_index_from_positions(*bot_move)
+                )
+                return self.step(
+                    action_dict={self.bot_player_num: bot_move_action_index},
+                    allow_piece_oscillation=True,
+                    is_spatial_index=False,
+                )
 
             elif self.vs_bot and self.player == self.bot_player_num:
                 assert False
@@ -770,39 +1013,40 @@ class StrategoMultiAgentEnv:
             infos = {}
         else:
             dones = {1: True, -1: True, "__all__": True}
-            obs = {1: self._get_current_obs(player=1), -1: self._get_current_obs(player=-1)}
+            obs = {
+                1: self._get_current_obs(player=1),
+                -1: self._get_current_obs(player=-1),
+            }
 
             infos = {1: {}, -1: {}}
 
             if self.base_env.get_game_result_is_invalid(self.state):
                 rewards = {1: 0, -1: 0}
-                infos[1]['game_result_was_invalid'] = True
-                infos[-1]['game_result_was_invalid'] = True
-                infos[1]['game_result'] = 'tied'
-                infos[-1]['game_result'] = 'tied'
+                infos[1]["game_result_was_invalid"] = True
+                infos[-1]["game_result_was_invalid"] = True
+                infos[1]["game_result"] = "tied"
+                infos[-1]["game_result"] = "tied"
             else:
-                infos[1]['game_result_was_invalid'] = False
-                infos[-1]['game_result_was_invalid'] = False
+                infos[1]["game_result_was_invalid"] = False
+                infos[-1]["game_result_was_invalid"] = False
 
                 player_1_reward = self.base_env.get_game_ended(self.state, player=1)
                 player_2_reward = self.base_env.get_game_ended(self.state, player=-1)
 
                 if player_1_reward == 1:
-                    infos[1]['game_result'] = 'won'
-                    infos[-1]['game_result'] = 'lost'
+                    infos[1]["game_result"] = "won"
+                    infos[-1]["game_result"] = "lost"
                 elif player_1_reward == -1:
-                    infos[1]['game_result'] = 'lost'
-                    infos[-1]['game_result'] = 'won'
+                    infos[1]["game_result"] = "lost"
+                    infos[-1]["game_result"] = "won"
                 else:
-                    infos[1]['game_result'] = 'tied'
-                    infos[-1]['game_result'] = 'tied'
+                    infos[1]["game_result"] = "tied"
+                    infos[-1]["game_result"] = "tied"
 
-                rewards = {1: player_1_reward,
-                           -1: player_2_reward}
+                rewards = {1: player_1_reward, -1: player_2_reward}
 
-            if self.penalize_ties and infos[1]['game_result'] == 'tied':
-                rewards = {1: -0.5,
-                           -1: -0.5}
+            if self.penalize_ties and infos[1]["game_result"] == "tied":
+                rewards = {1: -0.5, -1: -0.5}
 
             if self.vs_human:
                 obs.pop(self.human_player_num)
@@ -823,15 +1067,22 @@ class StrategoMultiAgentEnv:
             infos = {self.player_map(k): v for k, v in infos.items()}
 
         if self.vs_bot:
-            assert self.bot_player_num not in obs, f"check for bot move: {check_for_bot_move} self.player: {self.player}, \nrewards: {rewards}\ndones: {dones} \nobs:\n{obs}"
+            assert (
+                self.bot_player_num not in obs
+            ), f"check for bot move: {check_for_bot_move} self.player: {self.player}, \nrewards: {rewards}\ndones: {dones} \nobs:\n{obs}"
 
         return obs, rewards, dones, infos
 
     @staticmethod
     def sample_random_valid_action(valid_actions_mask):
         flattened_valid_actions_mask = np.reshape(valid_actions_mask, -1)
-        uniform_distribution_over_valid_actions = flattened_valid_actions_mask / np.sum(valid_actions_mask)
-        return np.random.choice(range(len(flattened_valid_actions_mask)), p=uniform_distribution_over_valid_actions)
+        uniform_distribution_over_valid_actions = flattened_valid_actions_mask / np.sum(
+            valid_actions_mask
+        )
+        return np.random.choice(
+            range(len(flattened_valid_actions_mask)),
+            p=uniform_distribution_over_valid_actions,
+        )
 
 
 def make_stratego_env(env_config):

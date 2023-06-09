@@ -6,37 +6,43 @@ import numpy as np
 from stratego_env.game import stratego_procedural_env
 from stratego_env.game.enums import GameVersions
 from stratego_env.game.stratego_procedural_env import StrategoProceduralEnv
-from stratego_env.game.stratego_procedural_impl import INT_DTYPE_NP
-from stratego_env.game.stratego_procedural_impl import StateData
+from stratego_env.game.stratego_procedural_impl import INT_DTYPE_NP, StateData
 
 
 def _create_random_initial_piece_map(game_version_config: dict):
-    correct_board_shape = (game_version_config['rows'], game_version_config['columns'])
+    correct_board_shape = (game_version_config["rows"], game_version_config["columns"])
     initial_piece_map = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
 
-    valid_piece_locations = [(row, col)
-                             for row in range(game_version_config['initial_state_usable_rows'])
-                             for col in range(game_version_config['columns'])]
+    valid_piece_locations = [
+        (row, col)
+        for row in range(game_version_config["initial_state_usable_rows"])
+        for col in range(game_version_config["columns"])
+    ]
 
     random.shuffle(valid_piece_locations)
 
     idx_in_valid_piece_locations = 0
-    for piece_type, amount_allowed in game_version_config['piece_amounts'].items():
-
+    for piece_type, amount_allowed in game_version_config["piece_amounts"].items():
         for _ in range(amount_allowed):
-            initial_piece_map[valid_piece_locations[idx_in_valid_piece_locations]] = piece_type.value
+            initial_piece_map[
+                valid_piece_locations[idx_in_valid_piece_locations]
+            ] = piece_type.value
             idx_in_valid_piece_locations += 1
 
     return initial_piece_map
 
 
-def get_random_initial_state_fn(base_env: StrategoProceduralEnv, game_version_config: dict):
+def get_random_initial_state_fn(
+    base_env: StrategoProceduralEnv, game_version_config: dict
+):
     def random_initial_state():
-
-        correct_board_shape = (game_version_config['rows'], game_version_config['columns'])
+        correct_board_shape = (
+            game_version_config["rows"],
+            game_version_config["columns"],
+        )
 
         obstacle_map = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
-        for obstacle_location in game_version_config['obstacle_locations']:
+        for obstacle_location in game_version_config["obstacle_locations"]:
             obstacle_map[obstacle_location] = 1
 
         piece_maps = []
@@ -48,7 +54,8 @@ def get_random_initial_state_fn(base_env: StrategoProceduralEnv, game_version_co
             obstacle_map=obstacle_map,
             player_1_initial_piece_map=piece_maps[0],
             player_2_initial_piece_map=piece_maps[1],
-            max_turns=game_version_config['max_turns'])
+            max_turns=game_version_config["max_turns"],
+        )
 
     return random_initial_state
 
@@ -111,62 +118,69 @@ def get_random_initial_state_fn(base_env: StrategoProceduralEnv, game_version_co
 
 # A: NOPIECE
 
+
 def create_random_board(game_version_config: dict):
-    correct_board_shape = (game_version_config['rows'], game_version_config['columns'])
+    correct_board_shape = (game_version_config["rows"], game_version_config["columns"])
     initial_piece_map = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
 
-    valid_piece_locations = [(row, col)
-                             for row in range(game_version_config['initial_state_usable_rows'])
-                             for col in range(game_version_config['columns'])]
+    valid_piece_locations = [
+        (row, col)
+        for row in range(game_version_config["initial_state_usable_rows"])
+        for col in range(game_version_config["columns"])
+    ]
 
     random.shuffle(valid_piece_locations)
 
     idx_in_valid_piece_locations = 0
-    for piece_type, amount_allowed in game_version_config['piece_amounts'].items():
-
+    for piece_type, amount_allowed in game_version_config["piece_amounts"].items():
         for _ in range(amount_allowed):
-            initial_piece_map[valid_piece_locations[idx_in_valid_piece_locations]] = piece_type.value
+            initial_piece_map[
+                valid_piece_locations[idx_in_valid_piece_locations]
+            ] = piece_type.value
             idx_in_valid_piece_locations += 1
 
     return initial_piece_map
 
 
 def create_board_from_string(game_version_config: dict):
-    correct_board_shape = (game_version_config['rows'], game_version_config['columns'])
+    correct_board_shape = (game_version_config["rows"], game_version_config["columns"])
     initial_piece_map = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
 
-    valid_piece_locations = [(row, col)
-                             for row in range(game_version_config['initial_state_usable_rows'])
-                             for col in range(game_version_config['columns'])]
+    valid_piece_locations = [
+        (row, col)
+        for row in range(game_version_config["initial_state_usable_rows"])
+        for col in range(game_version_config["columns"])
+    ]
 
     random.shuffle(valid_piece_locations)
 
     idx_in_valid_piece_locations = 0
-    for piece_type, amount_allowed in game_version_config['piece_amounts'].items():
-
+    for piece_type, amount_allowed in game_version_config["piece_amounts"].items():
         for _ in range(amount_allowed):
-            initial_piece_map[valid_piece_locations[idx_in_valid_piece_locations]] = piece_type.value
+            initial_piece_map[
+                valid_piece_locations[idx_in_valid_piece_locations]
+            ] = piece_type.value
             idx_in_valid_piece_locations += 1
 
     return initial_piece_map
 
 
 def convert_letter_to_num_left(letter):
-    if letter == 'A':
+    if letter == "A":
         return 0
-    if letter == 'B':
+    if letter == "B":
         return 12
-    elif letter == 'C':
+    elif letter == "C":
         return 1
-    elif letter == 'D':
+    elif letter == "D":
         return 2
-    elif letter == 'E':
+    elif letter == "E":
         return 3
-    elif letter == 'F':
+    elif letter == "F":
         return 4
-    elif letter == 'G':
+    elif letter == "G":
         return 5
-    elif letter == 'H':
+    elif letter == "H":
         return 6
     elif letter == "I":
         return 7
@@ -181,21 +195,21 @@ def convert_letter_to_num_left(letter):
 
 
 def convert_letter_to_num_right(letter):
-    if letter == 'A':
+    if letter == "A":
         return 0
-    if letter == 'N':
+    if letter == "N":
         return 12
-    elif letter == 'O':
+    elif letter == "O":
         return 1
-    elif letter == 'P':
+    elif letter == "P":
         return 2
-    elif letter == 'Q':
+    elif letter == "Q":
         return 3
-    elif letter == 'R':
+    elif letter == "R":
         return 4
-    elif letter == 'S':
+    elif letter == "S":
         return 5
-    elif letter == 'T':
+    elif letter == "T":
         return 6
     elif letter == "U":
         return 7
@@ -238,8 +252,10 @@ def convert(game_line, is_left):
 # Add parameters that take in string in format of "LDAAAAAAAAKCAAAAAAAABEAAAAAAAAMDAAAAAAAA"
 # calls "convert" to convert with the string to convert it to the first four rows of the board
 # adds 0 to the rest of the board
-def create_initial_positions_from_human_data(player1_string, player2_string, game_version_config: dict):
-    correct_board_shape = (game_version_config['rows'], game_version_config['columns'])
+def create_initial_positions_from_human_data(
+    player1_string, player2_string, game_version_config: dict
+):
+    correct_board_shape = (game_version_config["rows"], game_version_config["columns"])
     initial_piece_map1 = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
     initial_piece_map2 = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
     positions = np.asarray([initial_piece_map1, initial_piece_map2])
@@ -260,40 +276,56 @@ def create_initial_positions_from_human_data(player1_string, player2_string, gam
         j = 0
         k = 9
         while j < k:
-            positions[0][i][j], positions[0][i][k] = positions[0][i][k], positions[0][i][j]
+            positions[0][i][j], positions[0][i][k] = (
+                positions[0][i][k],
+                positions[0][i][j],
+            )
             j += 1
             k -= 1
 
     # rotates 180 over x axis for player 2
     for i in range(2):
         for k in range(10):
-            positions[i][0][k], positions[i][3][k] = positions[i][3][k], positions[i][0][k]
-            positions[i][1][k], positions[i][2][k] = positions[i][2][k], positions[i][1][k]
+            positions[i][0][k], positions[i][3][k] = (
+                positions[i][3][k],
+                positions[i][0][k],
+            )
+            positions[i][1][k], positions[i][2][k] = (
+                positions[i][2][k],
+                positions[i][1][k],
+            )
 
     positions = positions[:, :, ::-1]
 
     return positions
 
 
-def create_game_from_data(player1_string, player2_string, game_version_config, procedural_env=None):
-    correct_board_shape = (game_version_config['rows'], game_version_config['columns'])
+def create_game_from_data(
+    player1_string, player2_string, game_version_config, procedural_env=None
+):
+    correct_board_shape = (game_version_config["rows"], game_version_config["columns"])
 
     if procedural_env is None:
-        procedural_env = stratego_procedural_env.StrategoProceduralEnv(*correct_board_shape)
+        procedural_env = stratego_procedural_env.StrategoProceduralEnv(
+            *correct_board_shape
+        )
 
     obstacle_map = np.zeros(shape=correct_board_shape, dtype=INT_DTYPE_NP)
-    for obstacle_location in game_version_config['obstacle_locations']:
+    for obstacle_location in game_version_config["obstacle_locations"]:
         obstacle_map[obstacle_location] = 1.0
 
-    piece_maps = create_initial_positions_from_human_data(player1_string, player2_string, game_version_config)
+    piece_maps = create_initial_positions_from_human_data(
+        player1_string, player2_string, game_version_config
+    )
 
-    max_turns = game_version_config['max_turns']
+    max_turns = game_version_config["max_turns"]
 
     game = procedural_env.create_initial_state(
         obstacle_map=np.array(obstacle_map),
         player_1_initial_piece_map=np.array(piece_maps[0]),
         player_2_initial_piece_map=np.array(piece_maps[1]),
-        max_turns=int(max_turns))
+        max_turns=int(max_turns),
+    )
 
     return game
 
@@ -301,30 +333,50 @@ def create_game_from_data(player1_string, player2_string, game_version_config, p
 def get_random_human_init_fn(game_version, game_version_config, procedural_env=None):
     if isinstance(game_version, GameVersions):
         game_version = game_version.value
-        
-    if game_version in [GameVersions.STANDARD.value, GameVersions.SHORT_STANDARD.value, GameVersions.MEDIUM_STANDARD.value]:
-        from stratego_env.game.inits.standard_human_inits import STANDARD_INITS as HUMAN_INITS
+
+    if game_version in [
+        GameVersions.STANDARD.value,
+        GameVersions.SHORT_STANDARD.value,
+        GameVersions.MEDIUM_STANDARD.value,
+    ]:
+        from stratego_env.game.inits.standard_human_inits import \
+            STANDARD_INITS as HUMAN_INITS
     elif game_version in [GameVersions.BARRAGE.value, GameVersions.SHORT_BARRAGE.value]:
-        from stratego_env.game.inits.barrage_human_inits import BARRAGE_INITS as HUMAN_INITS
+        from stratego_env.game.inits.barrage_human_inits import \
+            BARRAGE_INITS as HUMAN_INITS
     else:
-        raise ValueError("Human inits not supported with {} game version".format(game_version))
+        raise ValueError(
+            "Human inits not supported with {} game version".format(game_version)
+        )
 
     def random_human_init():
         player_1_string = np.random.choice(HUMAN_INITS)
         player_2_string = np.random.choice(HUMAN_INITS)
 
-        return create_game_from_data(player1_string=player_1_string, player2_string=player_2_string,
-                                     game_version_config=game_version_config, procedural_env=procedural_env)
+        return create_game_from_data(
+            player1_string=player_1_string,
+            player2_string=player_2_string,
+            game_version_config=game_version_config,
+            procedural_env=procedural_env,
+        )
 
     return random_human_init
 
 
-def load_h5(fname, debug=0, dtype=None, key=None, raise_on_failure=True, num_samples_to_load=None, read_offset=0):
+def load_h5(
+    fname,
+    debug=0,
+    dtype=None,
+    key=None,
+    raise_on_failure=True,
+    num_samples_to_load=None,
+    read_offset=0,
+):
     """load h5 file
-        if <key> is str: will load h5file[key]
-        if <key> is list: will load h5file[key[0]][key[1]][key[2]]....
+    if <key> is str: will load h5file[key]
+    if <key> is list: will load h5file[key[0]][key[1]][key[2]]....
     """
-    hfile = h5py.File(fname, 'r')
+    hfile = h5py.File(fname, "r")
     if debug:
         print(fname)
         print(hfile.keys())
@@ -359,10 +411,14 @@ def load_h5(fname, debug=0, dtype=None, key=None, raise_on_failure=True, num_sam
         if read_offset == 0:
             dat = np.asarray(xx, dtype=dtype if dtype is not None else xx.dtype)
         else:
-            dat = np.asarray(xx[read_offset:], dtype=dtype if dtype is not None else xx.dtype)
+            dat = np.asarray(
+                xx[read_offset:], dtype=dtype if dtype is not None else xx.dtype
+            )
     else:
-        dat = np.asarray(xx[read_offset:read_offset + num_samples_to_load],
-                         dtype=dtype if dtype is not None else xx.dtype)
+        dat = np.asarray(
+            xx[read_offset : read_offset + num_samples_to_load],
+            dtype=dtype if dtype is not None else xx.dtype,
+        )
     if debug:
         print(np.shape(dat))
         print(dat.dtype)
@@ -373,9 +429,17 @@ def load_h5(fname, debug=0, dtype=None, key=None, raise_on_failure=True, num_sam
 
 def get_random_curriculum_init_fn(inits_path, max_turns):
     def random_human_init():
-        state, offset = load_h5(fname=inits_path, key='state', num_samples_to_load=1, read_offset=-1)
+        state, offset = load_h5(
+            fname=inits_path, key="state", num_samples_to_load=1, read_offset=-1
+        )
         winner, w_offset = np.squeeze(
-            load_h5(fname=inits_path, key='winner', num_samples_to_load=1, read_offset=offset))
+            load_h5(
+                fname=inits_path,
+                key="winner",
+                num_samples_to_load=1,
+                read_offset=offset,
+            )
+        )
         assert offset == w_offset
         state = np.squeeze(state)
         winner = int(np.squeeze(winner))

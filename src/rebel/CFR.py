@@ -8,7 +8,7 @@ EPS = 1e-8
 log = logging.getLogger(__name__)
 
 
-class CFR():
+class CFR:
     """
     This class handles the MCTS tree.
     """
@@ -38,7 +38,10 @@ class CFR():
             self.search(canonicalBoard)
 
         s = self.game.stringRepresentation(canonicalBoard)
-        counts = [self.Nsa[(s, a)] if (s, a) in self.Nsa else 0 for a in range(self.game.getActionSize())]
+        counts = [
+            self.Nsa[(s, a)] if (s, a) in self.Nsa else 0
+            for a in range(self.game.getActionSize())
+        ]
 
         if temp == 0:
             bestAs = np.array(np.argwhere(counts == np.max(counts))).flatten()
@@ -47,7 +50,7 @@ class CFR():
             probs[bestA] = 1
             return probs
 
-        counts = [x ** (1. / temp) for x in counts]
+        counts = [x ** (1.0 / temp) for x in counts]
         counts_sum = float(sum(counts))
         probs = [x / counts_sum for x in counts]
         return probs
@@ -102,17 +105,20 @@ class CFR():
             return -v
 
         valids = self.Vs[s]
-        cur_best = -float('inf')
+        cur_best = -float("inf")
         best_act = -1
 
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
             if valids[a]:
                 if (s, a) in self.Qsa:
-                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
-                            1 + self.Nsa[(s, a)])
+                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(
+                        self.Ns[s]
+                    ) / (1 + self.Nsa[(s, a)])
                 else:
-                    u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
+                    u = (
+                        self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)
+                    )  # Q = 0 ?
 
                 if u > cur_best:
                     cur_best = u
@@ -125,7 +131,9 @@ class CFR():
         v = self.search(next_s)
 
         if (s, a) in self.Qsa:
-            self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (self.Nsa[(s, a)] + 1)
+            self.Qsa[(s, a)] = (self.Nsa[(s, a)] * self.Qsa[(s, a)] + v) / (
+                self.Nsa[(s, a)] + 1
+            )
             self.Nsa[(s, a)] += 1
 
         else:

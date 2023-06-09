@@ -1,11 +1,20 @@
 from stratego_env.game.stratego_procedural_impl import SP
 
 STANDARD_STRATEGO_CONFIG = {
-    'rows': 10,
-    'columns': 10,
-    'max_turns': 2000,
-    'obstacle_locations': [(4, 2), (5, 2), (4, 3), (5, 3), (4, 6), (5, 6), (4, 7), (5, 7)],
-    'piece_amounts': {
+    "rows": 10,
+    "columns": 10,
+    "max_turns": 2000,
+    "obstacle_locations": [
+        (4, 2),
+        (5, 2),
+        (4, 3),
+        (5, 3),
+        (4, 6),
+        (5, 6),
+        (4, 7),
+        (5, 7),
+    ],
+    "piece_amounts": {
         SP.SPY: 1,
         SP.SCOUT: 8,
         SP.MINER: 5,
@@ -17,17 +26,26 @@ STANDARD_STRATEGO_CONFIG = {
         SP.GENERAL: 1,
         SP.MARSHALL: 1,
         SP.FLAG: 1,
-        SP.BOMB: 6
+        SP.BOMB: 6,
     },
-    'initial_state_usable_rows': 4
+    "initial_state_usable_rows": 4,
 }
 
 MEDIUM_STANDARD_STRATEGO_CONFIG = {
-    'rows': 10,
-    'columns': 10,
-    'max_turns': 800,
-    'obstacle_locations': [(4, 2), (5, 2), (4, 3), (5, 3), (4, 6), (5, 6), (4, 7), (5, 7)],
-    'piece_amounts': {
+    "rows": 10,
+    "columns": 10,
+    "max_turns": 800,
+    "obstacle_locations": [
+        (4, 2),
+        (5, 2),
+        (4, 3),
+        (5, 3),
+        (4, 6),
+        (5, 6),
+        (4, 7),
+        (5, 7),
+    ],
+    "piece_amounts": {
         SP.SPY: 1,
         SP.SCOUT: 8,
         SP.MINER: 5,
@@ -39,17 +57,26 @@ MEDIUM_STANDARD_STRATEGO_CONFIG = {
         SP.GENERAL: 1,
         SP.MARSHALL: 1,
         SP.FLAG: 1,
-        SP.BOMB: 6
+        SP.BOMB: 6,
     },
-    'initial_state_usable_rows': 4
+    "initial_state_usable_rows": 4,
 }
 
 SHORT_STANDARD_STRATEGO_CONFIG = {
-    'rows': 10,
-    'columns': 10,
-    'max_turns': 400,
-    'obstacle_locations': [(4, 2), (5, 2), (4, 3), (5, 3), (4, 6), (5, 6), (4, 7), (5, 7)],
-    'piece_amounts': {
+    "rows": 10,
+    "columns": 10,
+    "max_turns": 400,
+    "obstacle_locations": [
+        (4, 2),
+        (5, 2),
+        (4, 3),
+        (5, 3),
+        (4, 6),
+        (5, 6),
+        (4, 7),
+        (5, 7),
+    ],
+    "piece_amounts": {
         SP.SPY: 1,
         SP.SCOUT: 8,
         SP.MINER: 5,
@@ -61,9 +88,9 @@ SHORT_STANDARD_STRATEGO_CONFIG = {
         SP.GENERAL: 1,
         SP.MARSHALL: 1,
         SP.FLAG: 1,
-        SP.BOMB: 6
+        SP.BOMB: 6,
     },
-    'initial_state_usable_rows': 4
+    "initial_state_usable_rows": 4,
 }
 
 # WORKS
@@ -115,11 +142,11 @@ SHORT_STANDARD_STRATEGO_CONFIG = {
 
 
 STANDARD_STRATEGO_CONFIG2 = {
-    'rows': 15,
-    'columns': 15,
-    'max_turns': 2000,
-    'obstacle_locations': [],
-    'piece_amounts': {
+    "rows": 15,
+    "columns": 15,
+    "max_turns": 2000,
+    "obstacle_locations": [],
+    "piece_amounts": {
         SP.SPY: 0,
         SP.SCOUT: 0,
         SP.MINER: 0,
@@ -131,9 +158,9 @@ STANDARD_STRATEGO_CONFIG2 = {
         SP.GENERAL: 0,
         SP.MARSHALL: 0,
         SP.FLAG: 1,
-        SP.BOMB: 0
+        SP.BOMB: 0,
     },
-    'initial_state_usable_rows': 5
+    "initial_state_usable_rows": 5,
 }
 
 # STANDARD_STRATEGO_CONFIG2 = {
@@ -159,11 +186,11 @@ STANDARD_STRATEGO_CONFIG2 = {
 # }
 
 OCTA_BARRAGE_STRATEGO_CONFIG = {
-    'rows': 8,
-    'columns': 8,
-    'max_turns': 1000,
-    'obstacle_locations': [(4, 2), (3, 2), (4, 5), (3, 5)],
-    'piece_amounts': {
+    "rows": 8,
+    "columns": 8,
+    "max_turns": 1000,
+    "obstacle_locations": [(4, 2), (3, 2), (4, 5), (3, 5)],
+    "piece_amounts": {
         SP.SPY: 1,
         SP.SCOUT: 2,
         SP.MINER: 1,
@@ -175,17 +202,26 @@ OCTA_BARRAGE_STRATEGO_CONFIG = {
         SP.GENERAL: 1,
         SP.MARSHALL: 1,
         SP.FLAG: 1,
-        SP.BOMB: 1
+        SP.BOMB: 1,
     },
-    'initial_state_usable_rows': 3
+    "initial_state_usable_rows": 3,
 }
 
 BARRAGE_STRATEGO_CONFIG = {
-    'rows': 10,
-    'columns': 10,
-    'max_turns': 1000,
-    'obstacle_locations': [(4, 2), (5, 2), (4, 3), (5, 3), (4, 6), (5, 6), (4, 7), (5, 7)],
-    'piece_amounts': {
+    "rows": 10,
+    "columns": 10,
+    "max_turns": 1000,
+    "obstacle_locations": [
+        (4, 2),
+        (5, 2),
+        (4, 3),
+        (5, 3),
+        (4, 6),
+        (5, 6),
+        (4, 7),
+        (5, 7),
+    ],
+    "piece_amounts": {
         SP.SPY: 1,
         SP.SCOUT: 2,
         SP.MINER: 1,
@@ -197,17 +233,26 @@ BARRAGE_STRATEGO_CONFIG = {
         SP.GENERAL: 1,
         SP.MARSHALL: 1,
         SP.FLAG: 1,
-        SP.BOMB: 1
+        SP.BOMB: 1,
     },
-    'initial_state_usable_rows': 4
+    "initial_state_usable_rows": 4,
 }
 
 SHORT_BARRAGE_STRATEGO_CONFIG = {
-    'rows': 10,
-    'columns': 10,
-    'max_turns': 100,
-    'obstacle_locations': [(4, 2), (5, 2), (4, 3), (5, 3), (4, 6), (5, 6), (4, 7), (5, 7)],
-    'piece_amounts': {
+    "rows": 10,
+    "columns": 10,
+    "max_turns": 100,
+    "obstacle_locations": [
+        (4, 2),
+        (5, 2),
+        (4, 3),
+        (5, 3),
+        (4, 6),
+        (5, 6),
+        (4, 7),
+        (5, 7),
+    ],
+    "piece_amounts": {
         SP.SPY: 1,
         SP.SCOUT: 2,
         SP.MINER: 1,
@@ -219,17 +264,17 @@ SHORT_BARRAGE_STRATEGO_CONFIG = {
         SP.GENERAL: 1,
         SP.MARSHALL: 1,
         SP.FLAG: 1,
-        SP.BOMB: 1
+        SP.BOMB: 1,
     },
-    'initial_state_usable_rows': 4
+    "initial_state_usable_rows": 4,
 }
 
 MEDIUM_STRATEGO_CONFIG = {
-    'rows': 6,
-    'columns': 6,
-    'max_turns': 200,
-    'obstacle_locations': [],
-    'piece_amounts': {
+    "rows": 6,
+    "columns": 6,
+    "max_turns": 200,
+    "obstacle_locations": [],
+    "piece_amounts": {
         SP.SPY: 0,
         SP.SCOUT: 0,
         SP.MINER: 0,
@@ -241,17 +286,17 @@ MEDIUM_STRATEGO_CONFIG = {
         SP.GENERAL: 0,
         SP.MARSHALL: 0,
         SP.FLAG: 1,
-        SP.BOMB: 0
+        SP.BOMB: 0,
     },
-    'initial_state_usable_rows': 1
+    "initial_state_usable_rows": 1,
 }
 
 FIVES_STRATEGO_CONFIG = {
-    'rows': 5,
-    'columns': 5,
-    'max_turns': 60,
-    'obstacle_locations': [],
-    'piece_amounts': {
+    "rows": 5,
+    "columns": 5,
+    "max_turns": 60,
+    "obstacle_locations": [],
+    "piece_amounts": {
         SP.SPY: 0,
         SP.SCOUT: 0,
         SP.MINER: 0,
@@ -263,17 +308,17 @@ FIVES_STRATEGO_CONFIG = {
         SP.GENERAL: 0,
         SP.MARSHALL: 0,
         SP.FLAG: 1,
-        SP.BOMB: 0
+        SP.BOMB: 0,
     },
-    'initial_state_usable_rows': 1
+    "initial_state_usable_rows": 1,
 }
 
 TINY_STRATEGO_CONFIG = {
-    'rows': 4,
-    'columns': 4,
-    'max_turns': 100,
-    'obstacle_locations': [],
-    'piece_amounts': {
+    "rows": 4,
+    "columns": 4,
+    "max_turns": 100,
+    "obstacle_locations": [],
+    "piece_amounts": {
         SP.SPY: 0,
         SP.SCOUT: 0,
         SP.MINER: 0,
@@ -285,17 +330,17 @@ TINY_STRATEGO_CONFIG = {
         SP.GENERAL: 0,
         SP.MARSHALL: 0,
         SP.FLAG: 1,
-        SP.BOMB: 0
+        SP.BOMB: 0,
     },
-    'initial_state_usable_rows': 1
+    "initial_state_usable_rows": 1,
 }
 
 MICRO_STRATEGO_CONFIG = {
-    'rows': 3,
-    'columns': 4,
-    'max_turns': 20,
-    'obstacle_locations': [],
-    'piece_amounts': {
+    "rows": 3,
+    "columns": 4,
+    "max_turns": 20,
+    "obstacle_locations": [],
+    "piece_amounts": {
         SP.SPY: 0,
         SP.SCOUT: 0,
         SP.MINER: 0,
@@ -307,7 +352,7 @@ MICRO_STRATEGO_CONFIG = {
         SP.GENERAL: 0,
         SP.MARSHALL: 0,
         SP.FLAG: 1,
-        SP.BOMB: 0
+        SP.BOMB: 0,
     },
-    'initial_state_usable_rows': 1
+    "initial_state_usable_rows": 1,
 }

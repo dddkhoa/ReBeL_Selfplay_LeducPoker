@@ -30,17 +30,20 @@ def gui_websocket_broker(base_env: StrategoProceduralEnv, port: int):
     sio = socketio.Server()
 
     static_files = {
-        '/': {'content_type': 'text/html', 'filename': os.path.join(STATIC_FILES_PATH, 'index.html')},
-        '/static': STATIC_FILES_PATH
+        "/": {
+            "content_type": "text/html",
+            "filename": os.path.join(STATIC_FILES_PATH, "index.html"),
+        },
+        "/static": STATIC_FILES_PATH,
     }
 
     app = socketio.WSGIApp(sio, static_files=static_files)
 
-    current_state = {'current_action_step': -1}
+    current_state = {"current_action_step": -1}
 
     @sio.event
     def connect(sid, environ):
-        print('connect ', sid)
+        print("connect ", sid)
 
     @sio.event
     def join_both_player_rooms(sid):
@@ -54,34 +57,60 @@ def gui_websocket_broker(base_env: StrategoProceduralEnv, port: int):
         sio.enter_room(sid=sid, room=_player_room(player))
         if player in current_state:
             print("emitted state update")
-            sio.emit("state_update_wait_for_action_request",
-                     data=(current_state[player], current_state['current_action_step'], False),
-                     room=_player_room(player))
+            sio.emit(
+                "state_update_wait_for_action_request",
+                data=(
+                    current_state[player],
+                    current_state["current_action_step"],
+                    False,
+                ),
+                room=_player_room(player),
+            )
 
     @sio.event
     def action_requested_from_env(sid, state, player, action_step, valid_moves):
         # print("server: action requested, player {}".format(player))
-        sio.emit("action_requested", data=(state, action_step, valid_moves), room=_player_room(player))
+        sio.emit(
+            "action_requested",
+            data=(state, action_step, valid_moves),
+            room=_player_room(player),
+        )
 
-        if current_state['current_action_step'] < action_step:
-            current_state['current_action_step'] = action_step
+        if current_state["current_action_step"] < action_step:
+            current_state["current_action_step"] = action_step
             current_state[player] = state
-            current_state[-player] = base_env.get_state_from_player_perspective(state=state, player=-1).tolist()
-            sio.emit("state_update_wait_for_action_request",
-                     data=(current_state[-player], current_state['current_action_step'], False),
-                     room=_player_room(-player))
+            current_state[-player] = base_env.get_state_from_player_perspective(
+                state=state, player=-1
+            ).tolist()
+            sio.emit(
+                "state_update_wait_for_action_request",
+                data=(
+                    current_state[-player],
+                    current_state["current_action_step"],
+                    False,
+                ),
+                room=_player_room(-player),
+            )
 
     @sio.event
     def reset_game(sid, initial_state):
-        current_state['current_action_step'] = 0
+        current_state["current_action_step"] = 0
         current_state[1] = initial_state
-        current_state[-1] = base_env.get_state_from_player_perspective(state=initial_state, player=-1).tolist()
+        current_state[-1] = base_env.get_state_from_player_perspective(
+            state=initial_state, player=-1
+        ).tolist()
 
-        sio.emit("state_update_wait_for_action_request",
-                 data=(current_state[1], current_state['current_action_step'], True), room=_player_room(1))
+        sio.emit(
+            "state_update_wait_for_action_request",
+            data=(current_state[1], current_state["current_action_step"], True),
+            room=_player_room(1),
+        )
 
-        sio.emit("state_update_wait_for_action_request",
-                 data=(current_state[-1], current_state['current_action_step'], True), room=_player_room(-1))
+        sio.emit(
+            "state_update_wait_for_action_request",
+            data=(current_state[-1], current_state["current_action_step"], True),
+            room=_player_room(-1),
+        )
 
     @sio.event
     def action_selected_by_browser(sid, action_step, action_positions, player):
@@ -90,18 +119,19 @@ def gui_websocket_broker(base_env: StrategoProceduralEnv, port: int):
 
     @sio.event
     def disconnect(sid):
-        print('disconnect ', sid)
+        print("disconnect ", sid)
 
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', port)), app, log_output=False)
+    eventlet.wsgi.server(eventlet.listen(("0.0.0.0", port)), app, log_output=False)
 
 
 class StrategoHumanGUIServer(object):
-
     def __init__(self, base_env: StrategoProceduralEnv, port: int = 7000):
         self.state = None
         self.base_env: StrategoProceduralEnv = base_env
 
-        self.broker_p = Process(target=gui_websocket_broker, args=(self.base_env, port), daemon=True)
+        self.broker_p = Process(
+            target=gui_websocket_broker, args=(self.base_env, port), daemon=True
+        )
         self.broker_p.start()
 
         self.sio = socketio.Client(logger=False)
@@ -112,29 +142,37 @@ class StrategoHumanGUIServer(object):
 
         @self.sio.event
         def connect():
-            print('connection established')
+            print("connection established")
             self.sio.emit("join_both_player_rooms")
 
         @self.sio.event
         def action_selected_for_env(action_step, action, player):
-            print('action {}, received with step {} from player {}'.format(action, action_step, player))
+            print(
+                "action {}, received with step {} from player {}".format(
+                    action, action_step, player
+                )
+            )
 
             with self.action_step_lock:
-                if action_step == self.current_action_step_num and player == self.current_action_player:
+                if (
+                    action_step == self.current_action_step_num
+                    and player == self.current_action_player
+                ):
                     self.current_action = action
 
         @self.sio.event
         def disconnect():
-            print('disconnected from server')
+            print("disconnected from server")
 
         retry_secs = 0.1
         retries = 5
         for retry in range(retries):
             try:
-                self.sio.connect('http://localhost:{}'.format(port), )
+                self.sio.connect(
+                    "http://localhost:{}".format(port),
+                )
                 break
             except ConnectionError:
-
                 if retry + 1 >= retries:
                     raise ConnectionError
 
@@ -153,8 +191,12 @@ class StrategoHumanGUIServer(object):
     def get_action_by_position(self, state: np.ndarray, player):
         action = None
 
-        player_perspective_state = self.base_env.get_state_from_player_perspective(state=state, player=player)
-        pp_valid_moves = self.base_env.get_dict_of_valid_moves_by_position(state=player_perspective_state, player=1)
+        player_perspective_state = self.base_env.get_state_from_player_perspective(
+            state=state, player=player
+        )
+        pp_valid_moves = self.base_env.get_dict_of_valid_moves_by_position(
+            state=player_perspective_state, player=1
+        )
 
         with self.action_step_lock:
             self.current_action_player = player
@@ -162,11 +204,15 @@ class StrategoHumanGUIServer(object):
         print("waiting for action from player", player)
         while action is None:
             with self.action_step_lock:
-                self.sio.emit(event="action_requested_from_env",
-                              data=(player_perspective_state.tolist(),
-                                    player,
-                                    self.current_action_step_num,
-                                    pp_valid_moves))
+                self.sio.emit(
+                    event="action_requested_from_env",
+                    data=(
+                        player_perspective_state.tolist(),
+                        player,
+                        self.current_action_step_num,
+                        pp_valid_moves,
+                    ),
+                )
 
                 if self.current_action is not None:
                     action = self.current_action
@@ -182,10 +228,10 @@ class StrategoHumanGUIServer(object):
         self.broker_p.kill()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     config = STANDARD_STRATEGO_CONFIG
 
-    base_env = StrategoProceduralEnv(config['rows'], config['columns'])
+    base_env = StrategoProceduralEnv(config["rows"], config["columns"])
 
     s = StrategoHumanGUIServer(base_env=base_env)
 
