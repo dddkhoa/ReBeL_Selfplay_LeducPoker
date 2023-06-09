@@ -4,7 +4,4 @@ gymnasium
 ipython
 tqdm
 jupyter
-
-
-# Battleship Environment
--e git+https://github.com/thomashirtz/gym-battleship#egg=gym-battleship
+pre-commit

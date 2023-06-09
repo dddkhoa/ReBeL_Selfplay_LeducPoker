@@ -6,6 +6,7 @@ src/gym-battleship
 
 # File-based project format
 *.iws
+.ipynb_checkpoints
 
 
 # Others
