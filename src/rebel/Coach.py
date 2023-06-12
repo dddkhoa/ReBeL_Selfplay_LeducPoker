@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 
-from CFR import CFR
+from src.rebel.CFR import CFR
 log = logging.getLogger(__name__)
 
 
@@ -53,6 +53,7 @@ class Coach():
         param = p0 if curPlayer == 1 else p1
         strategy = node.get_strategy(param, board, curPlayer)
         actions = self.game.getValidMoves(canonicalBoard, curPlayer)
+        print(actions)
         util = self.game.getInitBoard()
 
         nodeUtil = 0

@@ -1,14 +1,6 @@
-import sys
-
-sys.path.append("..")
-import argparse
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from utils import *
-
 
 class StrategoNNet(nn.Module):
     def __init__(self, game, args):
@@ -43,7 +35,7 @@ class StrategoNNet(nn.Module):
         self.fc4 = nn.Linear(512, 1)
 
     def forward(self, s):
-        #                                                           s: batch_size x board_x x board_y
+        # s: batch_size x board_x x board_y
         s = s.view(
             -1, 1, self.board_x, self.board_y
         )  # batch_size x 1 x board_x x board_y

@@ -1,14 +1,12 @@
 import os
-import sys
 import time
 
 import numpy as np
 from tqdm import tqdm
 
-sys.path.append("../../")
 import torch
 import torch.optim as optim
-from utils import *
+from src.rebel.utils import *
 
 from src.rebel.StrategoNNet import StrategoNNet as stnnet
 
