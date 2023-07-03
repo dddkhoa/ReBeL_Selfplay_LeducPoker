@@ -1,11 +1,6 @@
 torch~=1.13
-stable-baselines3
 gymnasium
 ipython
 tqdm
 jupyter
-pre-commit
-Flask-SocketIO~=4.3.1
-python-engineio~=3.13.2
-python-socketio~=4.6.0
-coloredlogs
+rlcard[torch]
