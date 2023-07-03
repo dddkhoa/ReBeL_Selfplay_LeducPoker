@@ -53,7 +53,7 @@ if __name__ == '__main__':
     model.train()
     model.to(train_device)
     opt = torch.optim.Adam(model.parameters())
-    max_epochs = 5
+    max_epochs = 10
     purging_epochs = set([20])
     epoch_batch = 1
     batch_size = 1
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     network_sync_epochs = 1
     train_gen_ratio = 4
     grad_clip = 5.0
-    ckpt_every = 1
+    ckpt_every = 5
 
     ckpt_dir = '../model/test'
 
