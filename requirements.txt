@@ -1,10 +1,6 @@
 torch~=1.13
-stable-baselines3
 gymnasium
 ipython
 tqdm
 jupyter
-
-
-# Battleship Environment
--e git+https://github.com/thomashirtz/gym-battleship#egg=gym-battleship
+rlcard[torch]

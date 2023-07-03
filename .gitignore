@@ -6,7 +6,9 @@ src/gym-battleship
 
 # File-based project format
 *.iws
+.ipynb_checkpoints
 
+.__pycache__
 
 # Others
 *.xml
